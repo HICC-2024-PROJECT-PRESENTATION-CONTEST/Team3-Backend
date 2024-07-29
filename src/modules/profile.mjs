@@ -1,0 +1,454 @@
+import database from './database.mjs';
+import crypto from 'node:crypto';
+import seedrandom from 'seedrandom';
+
+class Profile {
+  #uid;
+  #name;
+  #phone;
+  #passhash;
+  #gender;
+  #birthyear;
+  #offset_up;
+  #offset_down;
+  #height;
+  #major;
+  #mbti;
+  #looklike;
+  #smoking;
+  #choicescount;
+
+  constructor(uid = crypto.randomUUID()) {
+    this.#uid = uid;
+  }
+
+  async create(password) {
+    this.#passhash = hash(password);
+
+    return new Promise((resolve, reject) => {
+      let sql = ``;
+      sql += `INSERT INTO \`profiles\` ( `;
+      sql += `uid, name, phone, passhash, gender, birthyear, offset_up, offset_down, height, major, mbti, looklike, smoking`;
+      sql += ` ) VALUES ( `;
+      sql += `?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?`;
+      sql += ` );`;
+      let values = [];
+      values.push(this.#uid);
+      values.push(this.#name);
+      values.push(this.#phone);
+      values.push(this.#passhash);
+      values.push(this.#gender);
+      values.push(this.#birthyear);
+      values.push(this.#offset_up);
+      values.push(this.#offset_down);
+      values.push(this.#height);
+      values.push(this.#major);
+      values.push(this.#mbti);
+      values.push(this.#looklike);
+      values.push(this.#smoking);
+
+      database.query(sql, values).then(resolve).catch(reject);
+    });
+  }
+
+  async read() {
+    return new Promise((resolve, reject) => {
+      let sql = ``;
+      sql += `SELECT * FROM \`profiles\` `;
+      sql += `WHERE \`uid\` = ? `;
+      sql += `;`;
+      let values = [this.#uid];
+
+      database
+        .query(sql, values)
+        .then((dataArray) => {
+          if (dataArray.length == 0) {
+            throw 'profile404';
+          }
+
+          const data = dataArray[0];
+
+          this.#name = data.name;
+          this.#phone = data.phone;
+          this.#passhash = data.passhash;
+          this.#gender = data.gender;
+          this.#birthyear = data.birthyear;
+          this.#offset_up = data.offset_up;
+          this.#offset_down = data.offset_down;
+          this.#height = data.height;
+          this.#major = data.major;
+          this.#mbti = data.mbti;
+          this.#looklike = data.looklike;
+          this.#smoking = data.smoking;
+          this.#choicescount = data.choicescount;
+
+          resolve();
+        })
+        .catch(reject);
+    });
+  }
+
+  async update() {
+    return new Promise((resolve, reject) => {
+      let sql = ``;
+      sql += `UPDATE \`profiles\` `;
+      sql += `SET \`name\` = ?, `;
+      sql += `\`phone\` = ?, `;
+      sql += `\`gender\` = ?, `;
+      sql += `\`birthyear\` = ?, `;
+      sql += `\`offset_up\` = ?, `;
+      sql += `\`offset_down\` = ?, `;
+      sql += `\`height\` = ?, `;
+      sql += `\`major\` = ?, `;
+      sql += `\`mbti\` = ?, `;
+      sql += `\`looklike\` = ?, `;
+      sql += `\`smoking\` = ?, `;
+      sql += `\`choicescount\` = ? `;
+      sql += `WHERE \`uid\` = ? `;
+      sql += `;`;
+      let values = [];
+      values.push(this.#name);
+      values.push(this.#phone);
+      values.push(this.#gender);
+      values.push(this.#birthyear);
+      values.push(this.#offset_up);
+      values.push(this.#offset_down);
+      values.push(this.#height);
+      values.push(this.#major);
+      values.push(this.#mbti);
+      values.push(this.#looklike);
+      values.push(this.#smoking);
+      values.push(this.#choicescount);
+      values.push(this.#uid);
+
+      database.query(sql, values).then(resolve).catch(reject);
+    });
+  }
+
+  async delete() {
+    return new Promise((resolve, reject) => {
+      let sql = ``;
+      sql += `DELETE FROM \`profiles\` `;
+      sql += `WHERE \`uid\` = ?`;
+      sql += `;`;
+      let values = [this.#uid];
+
+      database.query(sql, values).then(resolve).catch(reject);
+    });
+  }
+
+  check(password) {
+    const h = hash(password);
+    return h === this.#passhash;
+  }
+
+  get uid() {
+    return this.#uid;
+  }
+
+  get name() {
+    return this.#name;
+  }
+
+  set name(name) {
+    name = database.escape(name);
+    if (!name) {
+      throw 'default400';
+    }
+    this.#name = name;
+  }
+
+  get phone() {
+    return this.#phone;
+  }
+
+  set phone(phone) {
+    phone = database.escape(phone);
+    if (!phone) {
+      throw 'default400';
+    }
+    this.#phone = phone;
+  }
+
+  get gender() {
+    return this.#gender;
+  }
+
+  set gender(gender) {
+    gender = database.escape(gender);
+    if (!gender) {
+      throw 'default400';
+    }
+    this.#gender = gender;
+  }
+
+  get birthyear() {
+    return this.#birthyear;
+  }
+
+  set birthyear(birthyear) {
+    if (birthyear == undefined || birthyear == null) {
+      throw 'default400';
+    }
+    this.#birthyear = birthyear;
+  }
+
+  get offset_up() {
+    return this.#offset_up;
+  }
+
+  set offset_up(offset_up) {
+    if (offset_up == undefined || offset_up == null) {
+      throw 'default400';
+    }
+    this.#offset_up = offset_up;
+  }
+
+  get offset_down() {
+    return this.#offset_down;
+  }
+
+  set offset_down(offset_down) {
+    if (offset_down == undefined || offset_down == null) {
+      throw 'default400';
+    }
+    this.#offset_down = offset_down;
+  }
+
+  get height() {
+    return this.#height;
+  }
+
+  set height(height) {
+    this.#height = height * 1 || 0;
+  }
+
+  get major() {
+    return this.#major;
+  }
+
+  set major(major) {
+    this.#major = database.escape(major);
+  }
+
+  get mbti() {
+    return this.#mbti;
+  }
+
+  set mbti(mbti) {
+    this.#mbti = database.escape(mbti);
+  }
+
+  get looklike() {
+    return this.#looklike;
+  }
+
+  set looklike(looklike) {
+    looklike = database.escape(looklike);
+    if (!looklike) {
+      throw 'default400';
+    }
+    this.#looklike = looklike;
+  }
+
+  get smoking() {
+    return Boolean(this.#smoking);
+  }
+
+  set smoking(smoking) {
+    this.#smoking = Boolean(smoking);
+  }
+
+  get choicescount() {
+    return this.#choicescount;
+  }
+
+  set choicescount(choicescount) {
+    this.#choicescount = choicescount;
+  }
+
+  toJSON() {
+    return {
+      uid: this.uid,
+      name: this.name,
+      phone: this.phone,
+      gender: this.gender,
+      birthyear: this.birthyear,
+      birthyear_offset: {
+        plus: this.offset_up,
+        minus: this.offset_down,
+      },
+      height: this.height,
+      major: this.major,
+      mbti: this.mbti,
+      looklike: this.looklike,
+      smoking: this.smoking,
+    };
+  }
+
+  async recommands(size) {
+    const random = seedrandom(this.#uid);
+
+    return new Promise(async (resolve, reject) => {
+      const quries = [
+        {
+          sql: `SELECT uid FROM \`profiles\` WHERE \`gender\` != ? AND \`birthyear\` < ? AND \`birthyear\` > ?`,
+          values: [
+            this.#gender,
+            this.#birthyear + this.offset_up,
+            this.#birthyear - this.offset_down,
+          ],
+        },
+        {
+          sql: `SELECT uid FROM \`profiles\` WHERE \`gender\` != ?`,
+          values: [this.#gender],
+        },
+      ];
+
+      const profiles = [];
+      const tasks = [];
+
+      loop: for (const query of quries) {
+        const dataArray = await database
+          .query(query.sql, query.values)
+          .catch(reject);
+
+        while (dataArray.length > 0) {
+          const index = Math.floor(random() * dataArray.length);
+          const data = dataArray[index];
+          dataArray.splice(index, 1);
+          const profile = new Profile(data.uid);
+          profiles.push(profile);
+          tasks.push(profile.read());
+
+          if (profiles.length >= size) {
+            break loop;
+          }
+        }
+      }
+
+      await Promise.all(tasks).catch(reject);
+
+      const profilesData = [];
+      for (const profile of profiles) {
+        const data = profile.toJSON();
+        delete data.phone;
+        delete data.birthyear_offset;
+        profilesData.push(data);
+      }
+
+      resolve(profilesData);
+    });
+  }
+
+  async choice(target) {
+    return new Promise((resolve, reject) => {
+      if (this.#choicescount <= 0) {
+        reject('default409');
+        return;
+      }
+
+      this.#choicescount--;
+      this.update()
+        .then(() => {
+          let sql = ``;
+          sql += `INSERT INTO \`choices\` ( `;
+          sql += `\`from\`, \`to\``;
+          sql += ` ) VALUES ( `;
+          sql += `?, ?`;
+          sql += ` );`;
+          let values = [];
+          values.push(this.#uid);
+          values.push(target.uid);
+
+          database.query(sql, values).then(resolve).catch(reject);
+        })
+        .catch(reject);
+    });
+  }
+
+  async reject(target) {
+    return new Promise((resolve, reject) => {
+      let sql = ``;
+      sql += `DELETE FROM \`choices\` `;
+      sql += `WHERE \`from\` = ? AND \`to\` = ?`;
+      sql += `;`;
+      let values = [];
+      values.push(this.#uid);
+      values.push(target.uid);
+
+      database.query(sql, values).then(resolve).catch(reject);
+    });
+  }
+
+  async choices() {
+    return new Promise(async (resolve, reject) => {
+      let sql = ``;
+      sql += `SELECT \`to\` FROM \`choices\` `;
+      sql += `WHERE \`from\` = ?`;
+      sql += `;`;
+      let values = [];
+      values.push(this.#uid);
+
+      const dataArray = await database.query(sql, values).catch(reject);
+      const profiles = [];
+      const tasks = [];
+      for (const data of dataArray) {
+        const profile = new Profile(data.to);
+        profiles.push(profile);
+        tasks.push(profile.read());
+      }
+      await Promise.all(tasks).catch(reject);
+
+      const profilesData = [];
+      for (const profile of profiles) {
+        const data = profile.toJSON();
+        delete data.phone;
+        delete data.birthyear_offset;
+        profilesData.push(data);
+      }
+
+      resolve(profilesData);
+    });
+  }
+
+  async choicesFrom() {
+    return new Promise(async (resolve, reject) => {
+      let sql = ``;
+      sql += `SELECT \`from\` FROM \`choices\` `;
+      sql += `WHERE \`to\` = ?`;
+      sql += `;`;
+      let values = [];
+      values.push(this.#uid);
+
+      const dataArray = await database.query(sql, values).catch(reject);
+      const profiles = [];
+      const tasks = [];
+      for (const data of dataArray) {
+        const profile = new Profile(data.from);
+        profiles.push(profile);
+        tasks.push(profile.read());
+      }
+      await Promise.all(tasks).catch(reject);
+
+      const profilesData = [];
+      for (const profile of profiles) {
+        const data = profile.toJSON();
+        delete data.phone;
+        delete data.birthyear_offset;
+        profilesData.push(data);
+      }
+
+      resolve(profilesData);
+    });
+  }
+}
+
+function hash(key, salt = '') {
+  const source = crypto.createHash('sha512', salt);
+  source.update(key);
+  const hash = source.digest('hex');
+  return hash;
+}
+
+export default Profile;

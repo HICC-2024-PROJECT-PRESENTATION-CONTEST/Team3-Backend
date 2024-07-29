@@ -1,0 +1,28 @@
+{
+  "name": "team3-backend",
+  "version": "1.0.0",
+  "author": "Sungwan Jo <sung@wany.io>",
+  "main": "src/app.mjs",
+  "scripts": {
+    "start": "node src/app.mjs -p 80",
+    "dev": "nodemon src/app.mjs -p 2000 -dev",
+    "setup": "node scripts/setup.mjs",
+    "setup-test": "node scripts/setup.mjs -test"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.0",
+    "seedrandom": "^3.0.5",
+    "sharp": "^0.33.4"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "./config",
+      "./src/**/*.mjs"
+    ],
+    "ignore": [
+      "./src/public"
+    ]
+  }
+}
