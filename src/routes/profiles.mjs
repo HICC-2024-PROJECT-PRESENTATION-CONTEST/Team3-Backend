@@ -128,13 +128,13 @@ router.get('/:uid/choices', check.isMeOrManager(), async (req, res) => {
   const from = await req.profile.choicesFrom().catch(res.error);
 
   res.data({
-    to: to,
-    from: from,
+    choices_to: to,
+    choices_from: from,
   });
 });
 
 router.post('/:uid/choices', check.isMeOrManager(), async (req, res) => {
-  const target = new Profile(req.body.target);
+  const target = new Profile(req.body.uid);
 
   await target.read().catch(res.error);
 
@@ -144,7 +144,7 @@ router.post('/:uid/choices', check.isMeOrManager(), async (req, res) => {
 });
 
 router.delete('/:uid/choices', check.isManager(), async (req, res) => {
-  const target = new Profile(req.body.target);
+  const target = new Profile(req.body.uid);
 
   await target.read().catch(res.error);
 
