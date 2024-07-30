@@ -1,81 +1,64 @@
-import database from '../src/modules/database.mjs';
+import Profile from '../src/modules/profile.mjs';
 
-function run() {
-  return new Promise(async (resolve, reject) => {
-    await (async () => {
-      let sql = ``;
-      sql += `DROP TABLE IF EXISTS \`profiles\`; `;
-      let values = [];
+async function createProfile(data) {
+  const profile = new Profile();
 
-      await database.query(sql, values).catch(reject);
-    })();
+  try {
+    profile.name = data.name;
+    profile.phone = data.phone;
+    profile.gender = data.gender;
+    profile.birthyear = data.birthyear;
+    profile.offset_up = data.birthyear_offset?.plus;
+    profile.offset_down = data.birthyear_offset?.minus;
+    profile.height = data.height;
+    profile.major = data.major;
+    profile.mbti = data.mbti;
+    profile.looklike = data.looklike;
+    profile.smoking = data.smoking;
+  } catch (error) {
+    console.error(error);
+  }
 
-    await (async () => {
-      let sql = ``;
-      sql += `CREATE TABLE \`profiles\` ( `;
-      sql += `\`uid\` VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL, `;
-      sql += `\`name\` VARCHAR(32) COLLATE utf8mb4_unicode_ci NOT NULL, `;
-      sql += `\`phone\` VARCHAR(32) COLLATE utf8mb4_unicode_ci NOT NULL, `;
-      sql += `\`passhash\` VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL, `;
-      sql += `\`gender\` VARCHAR(1) COLLATE utf8mb4_unicode_ci NOT NULL, `;
-      sql += `\`birthyear\` INT COLLATE utf8mb4_unicode_ci NOT NULL, `;
-      sql += `\`offset_up\` INT COLLATE utf8mb4_unicode_ci NOT NULL, `;
-      sql += `\`offset_down\` INT COLLATE utf8mb4_unicode_ci NOT NULL, `;
-      sql += `\`height\` INT COLLATE utf8mb4_unicode_ci DEFAULT NULL, `;
-      sql += `\`major\` VARCHAR(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `;
-      sql += `\`mbti\` VARCHAR(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `;
-      sql += `\`looklike\` VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL, `;
-      sql += `\`smoking\` BOOLEAN COLLATE utf8mb4_unicode_ci NOT NULL, `;
-      sql += `\`choicescount\` INT COLLATE utf8mb4_unicode_ci DEFAULT 1, `;
-      sql += `PRIMARY KEY ( \`uid\` ) `;
-      sql += `) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;`;
-      let values = [];
+  await profile.create(data.password).catch(console.error);
+}
 
-      await database.query(sql, values).catch(reject);
-    })();
-
-    await (async () => {
-      let sql = ``;
-      sql += `DROP TABLE IF EXISTS \`sessions\`; `;
-      let values = [];
-
-      await database.query(sql, values).catch(reject);
-    })();
-
-    await (async () => {
-      let sql = ``;
-      sql += `CREATE TABLE \`sessions\` ( `;
-      sql += `\`uid\` VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL, `;
-      sql += `\`data\` LONGTEXT COLLATE utf8mb4_unicode_ci DEFAULT '{}', `;
-      sql += `\`expire\` DATETIME COLLATE utf8mb4_unicode_ci NOT NULL, `;
-      sql += `PRIMARY KEY ( \`uid\` ) `;
-      sql += `) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;`;
-      let values = [];
-
-      await database.query(sql, values).catch(reject);
-    })();
-
-    await (async () => {
-      let sql = ``;
-      sql += `DROP TABLE IF EXISTS \`choices\`; `;
-      let values = [];
-
-      await database.query(sql, values).catch(reject);
-    })();
-
-    await (async () => {
-      let sql = ``;
-      sql += `CREATE TABLE \`choices\` ( `;
-      sql += `\`from\` VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL, `;
-      sql += `\`to\` VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL `;
-      sql += `) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;`;
-      let values = [];
-
-      await database.query(sql, values).catch(reject);
-    })();
-
-    resolve();
-  });
+async function run() {
+  for (let i = 0; i < 100; i++) {
+    await createProfile({
+      name: '김익명 ' + String(i).padStart(3, '0'),
+      phone: '01010000',
+      password: '1234',
+      gender: 'M',
+      birthyear: 2000 + Math.floor(Math.random() * 10),
+      birthyear_offset: {
+        plus: Math.floor(Math.random() * 5),
+        minus: Math.floor(Math.random() * 5),
+      },
+      height: 175,
+      major: '자율전공',
+      mbti: 'ICBM',
+      looklike: 'MISSILE',
+      smoking: Math.random > 0.5,
+    });
+  }
+  for (let i = 0; i < 100; i++) {
+    await createProfile({
+      name: '힉익명 ' + i,
+      phone: '01020000' + String(i).padStart(3, '0'),
+      password: '1234',
+      gender: 'F',
+      birthyear: 2000 + Math.floor(Math.random() * 10),
+      birthyear_offset: {
+        plus: Math.floor(Math.random() * 5),
+        minus: Math.floor(Math.random() * 5),
+      },
+      height: 165,
+      major: '자율전공',
+      mbti: 'ICBM',
+      looklike: 'MISSILE',
+      smoking: Math.random > 0.5,
+    });
+  }
 }
 
 export default run;
