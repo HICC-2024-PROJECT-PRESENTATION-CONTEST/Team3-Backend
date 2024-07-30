@@ -47,7 +47,7 @@ router.post('/logout', async (req, res) => {
   res.ok();
 });
 
-router.get('/manager/:key', async (req, res) => {
+router.get('/manager/login/:key', async (req, res) => {
   const key = req.params.key;
 
   if (!(key === config['manager-key'])) {
