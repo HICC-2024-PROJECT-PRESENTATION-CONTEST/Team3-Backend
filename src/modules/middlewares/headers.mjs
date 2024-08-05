@@ -10,6 +10,8 @@ export default function responseHeaders(headers) {
         } else {
           res.header('Access-Control-Allow-Origin', null);
         }
+      } else if (key == 'Access-Control-Allow-Origin' && value == '*') {
+        res.header('Access-Control-Allow-Origin', req.headers.origin);
       }
       // Normal
       else {
