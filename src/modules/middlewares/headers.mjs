@@ -5,19 +5,15 @@ export default function responseHeaders(headers) {
 
       let origin = req.headers.origin;
 
-      if (!origin) {
-        origin = (req.secure ? 'https://' : 'http://') + req.headers.host;
-      }
-
       // Array of Access-Control-Allow-Origin values
       if (key == 'Access-Control-Allow-Origin' && value instanceof Array) {
         if (value.includes(req.headers.origin)) {
-          res.header('Access-Control-Allow-Origin', origin);
+          res.header('Access-Control-Allow-Origin', origin || '*');
         } else {
           res.header('Access-Control-Allow-Origin', null);
         }
       } else if (key == 'Access-Control-Allow-Origin' && value == '*') {
-        res.header('Access-Control-Allow-Origin', origin);
+        res.header('Access-Control-Allow-Origin', origin || '*');
       }
       // Normal
       else {
