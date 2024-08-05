@@ -6,9 +6,7 @@ export default function responseHeaders(headers) {
       let origin = req.headers.origin;
 
       if (!origin) {
-        origin =
-          (req.connection.encrypted ? 'https://' : 'http://') +
-          req.headers.host;
+        origin = (req.secure ? 'https://' : 'http://') + req.headers.host;
       }
 
       // Array of Access-Control-Allow-Origin values
@@ -19,7 +17,6 @@ export default function responseHeaders(headers) {
           res.header('Access-Control-Allow-Origin', null);
         }
       } else if (key == 'Access-Control-Allow-Origin' && value == '*') {
-        console.log(req.headers);
         res.header('Access-Control-Allow-Origin', origin);
       }
       // Normal
