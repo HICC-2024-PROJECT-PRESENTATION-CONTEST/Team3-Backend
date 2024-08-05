@@ -16,6 +16,7 @@ function run() {
       sql += `\`uid\` VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL, `;
       sql += `\`name\` VARCHAR(32) COLLATE utf8mb4_unicode_ci NOT NULL, `;
       sql += `\`phone\` VARCHAR(32) COLLATE utf8mb4_unicode_ci NOT NULL, `;
+      sql += `\`instagram\` VARCHAR(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL, `;
       sql += `\`passhash\` VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL, `;
       sql += `\`gender\` VARCHAR(1) COLLATE utf8mb4_unicode_ci NOT NULL, `;
       sql += `\`birthyear\` INT COLLATE utf8mb4_unicode_ci NOT NULL, `;
@@ -27,6 +28,7 @@ function run() {
       sql += `\`looklike\` VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL, `;
       sql += `\`smoking\` BOOLEAN COLLATE utf8mb4_unicode_ci NOT NULL, `;
       sql += `\`choicescount\` INT COLLATE utf8mb4_unicode_ci DEFAULT 1, `;
+      sql += `\`messagescount\` INT COLLATE utf8mb4_unicode_ci DEFAULT 1, `;
       sql += `PRIMARY KEY ( \`uid\` ) `;
       sql += `) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;`;
       let values = [];

@@ -5,9 +5,31 @@ import { routes as check } from '../modules/middlewares/index.mjs';
 
 import Profile from '../modules/profile.mjs';
 import profiles from '../modules/profiles.mjs';
+import images from '../modules/images.mjs';
+import fs from 'node:fs';
 
-router.get('/', check.isLogin(), async (req, res) => {
-  res.ok('Wanyne API');
+router.get('/', check.isManager(), async (req, res) => {
+  const page = req.query.page || 1;
+  const size = req.query.size || 10;
+  const find = req.query.find || null;
+
+  const search = find
+    ? {
+        name: find,
+        phone: find,
+        instagram: find,
+      }
+    : null;
+
+  if (req.query.count != undefined) {
+    const data = await profiles.count(search).catch(res.error);
+
+    res.data(data);
+  } else {
+    const list = await profiles.list(page, size, search).catch(res.error);
+
+    res.data(list);
+  }
 });
 
 router.post('/', check.isLogin(), async (req, res) => {
@@ -105,15 +127,29 @@ router.delete('/:uid', check.isMeOrManager(), async (req, res) => {
 });
 
 router.get('/:uid/image', async (req, res) => {
-  res.ok('Wanyne API');
+  let size = req.query.size || 900;
+  let file = images.get(req.profile.uid, size);
+  if (fs.existsSync(file)) {
+    res.sendFile(file);
+  } else {
+    res.error('file404');
+  }
 });
 
 router.patch('/:uid/image', check.isMeOrManager(), async (req, res) => {
-  res.ok('Wanyne API');
+  images
+    .upload(req, res)
+    .then(() => {
+      res.ok();
+    })
+    .catch((error) => {
+      res.error(error);
+    });
 });
 
 router.delete('/:uid/image', check.isMeOrManager(), async (req, res) => {
-  res.ok('Wanyne API');
+  images.del(req.profile.uid);
+  res.ok();
 });
 
 router.get('/:uid/recommands', check.isMeOrManager(), async (req, res) => {
@@ -134,7 +170,7 @@ router.get('/:uid/choices', check.isMeOrManager(), async (req, res) => {
 });
 
 router.post('/:uid/choices', check.isMeOrManager(), async (req, res) => {
-  const target = new Profile(req.body.uid);
+  const target = new Profile(req.body.target);
 
   await target.read().catch(res.error);
 
@@ -144,11 +180,22 @@ router.post('/:uid/choices', check.isMeOrManager(), async (req, res) => {
 });
 
 router.delete('/:uid/choices', check.isManager(), async (req, res) => {
-  const target = new Profile(req.body.uid);
+  const target = new Profile(req.body.target);
 
   await target.read().catch(res.error);
 
   await req.profile.reject(target).catch(res.error);
+
+  res.ok();
+});
+
+router.post('/:uid/message', check.isMeOrManager(), async (req, res) => {
+  const target = new Profile(req.body.target);
+  await target.read().catch(res.error);
+
+  const message = req.body.message;
+
+  await req.profile.message(target, message).catch(res.error);
 
   res.ok();
 });

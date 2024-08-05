@@ -6,6 +6,7 @@ const router = express.Router();
 import { routes as check } from '../modules/middlewares/index.mjs';
 
 import auth from '../modules/auth.mjs';
+import Profile from '../modules/profile.mjs';
 
 router.post('/qr', check.isManager(), (req, res) => {
   const key = auth.getQR();
@@ -21,9 +22,16 @@ router.get('/qr/:key', async (req, res) => {
     return;
   }
 
-  req.session.login = true;
-  req.session.profile = null;
-  await req.session.save().catch(res.error);
+  if (req.session.login && req.session.profile) {
+    const profile = new Profile(req.session.profile);
+    await profile.read().catch(res.error);
+    profile.choicescount++;
+    profile.messagescount++;
+  } else {
+    req.session.login = true;
+    req.session.profile = null;
+    await req.session.save().catch(res.error);
+  }
 
   req.query.redir ? res.redirect(req.query.redir) : res.ok();
 });
@@ -47,18 +55,18 @@ router.post('/logout', async (req, res) => {
   res.ok();
 });
 
-router.get('/manager/login/:key', async (req, res) => {
+router.post('/manager/login', async (req, res) => {
   const key = req.params.key;
 
   if (!(key === config['manager-key'])) {
-    res.error('auth403');
+    res.error('auth401');
     return;
   }
 
   req.session.manager = true;
   await req.session.save().catch(res.error);
 
-  req.query.redir ? res.redirect(req.query.redir) : res.ok();
+  res.ok();
 });
 
 export default router;

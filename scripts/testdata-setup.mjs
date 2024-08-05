@@ -6,6 +6,7 @@ async function createProfile(data) {
   try {
     profile.name = data.name;
     profile.phone = data.phone;
+    profile.instagram = data.instagram;
     profile.gender = data.gender;
     profile.birthyear = data.birthyear;
     profile.offset_up = data.birthyear_offset?.plus;
@@ -26,7 +27,8 @@ async function run() {
   for (let i = 0; i < 100; i++) {
     await createProfile({
       name: '김익명 ' + String(i).padStart(3, '0'),
-      phone: '01010000',
+      phone: '01010000' + String(i).padStart(3, '0'),
+      instagram: 'anonm' + String(i).padStart(3, '0'),
       password: '1234',
       gender: 'M',
       birthyear: 2000 + Math.floor(Math.random() * 10),
@@ -43,8 +45,9 @@ async function run() {
   }
   for (let i = 0; i < 100; i++) {
     await createProfile({
-      name: '힉익명 ' + i,
+      name: '힉익명 ' + String(i).padStart(3, '0'),
       phone: '01020000' + String(i).padStart(3, '0'),
+      instagram: 'anonf' + String(i).padStart(3, '0'),
       password: '1234',
       gender: 'F',
       birthyear: 2000 + Math.floor(Math.random() * 10),

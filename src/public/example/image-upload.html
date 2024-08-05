@@ -1,0 +1,96 @@
+<!-- 이미지 업로드 관련 코드 -->
+
+<button onclick="imgup()">이미지 업로드</button>
+
+<script>
+  function imgup() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/jpeg, image/png, image/webp';
+
+    input.addEventListener('change', (event) => {
+      const files = event.target.files;
+
+      if (files.length < 1) {
+        // 선택된 파일 없음
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', files[0]);
+
+      fetch('/profiles/@me/image', {
+        method: 'PATCH',
+        headers: {}, // 비워 놓아야 함
+        body: formData,
+      })
+        .then((res) => {
+          // 이미지 업로드 완료
+          alert('업로드 성공');
+          window.location.reload();
+        })
+        .catch((error) => {
+          // 오류
+        });
+    });
+
+    input.click();
+  }
+</script>
+
+<!-- 이미지 업로드 관련 코드 끝 -->
+
+<style>
+  .profile {
+    display: flex;
+  }
+  textarea {
+    width: 400px;
+    height: 300px;
+  }
+  .image {
+    width: 300px;
+    height: 300px;
+  }
+  .image > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>
+
+<p>현재 프로필</p>
+<div class="profile">
+  <div class="data">
+    <textarea></textarea>
+  </div>
+  <div class="image">
+    <img />
+  </div>
+</div>
+
+<script>
+  window.onload = () => {
+    fetch('/profiles/@me')
+      .then((res) => {
+        res.json().then((json) => {
+          const textarea = document.querySelector(
+            `.profile > .data > textarea`
+          );
+          for (const key in json.data) {
+            textarea.value += `${key}: ${
+              typeof json.data[key] === 'string'
+                ? json.data[key]
+                : JSON.stringify(json.data[key])
+            }\n`;
+          }
+          document.querySelector(`.profile > .image > img`).src =
+            '/profiles/@me/image';
+        });
+      })
+      .catch((error) => {
+        // 오류
+        console.log(error);
+      });
+  };
+</script>

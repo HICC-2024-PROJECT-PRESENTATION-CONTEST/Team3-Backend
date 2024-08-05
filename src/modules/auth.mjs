@@ -44,7 +44,7 @@ async function login(phone, password) {
   if (profile.check(password)) {
     return profile;
   } else {
-    throw 'auth403';
+    throw 'auth401';
   }
 }
 

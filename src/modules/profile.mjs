@@ -1,4 +1,5 @@
 import database from './database.mjs';
+import message from './message.mjs';
 import crypto from 'node:crypto';
 import seedrandom from 'seedrandom';
 
@@ -6,6 +7,7 @@ class Profile {
   #uid;
   #name;
   #phone;
+  #instagram;
   #passhash;
   #gender;
   #birthyear;
@@ -17,6 +19,7 @@ class Profile {
   #looklike;
   #smoking;
   #choicescount;
+  #messagescount;
 
   constructor(uid = crypto.randomUUID()) {
     this.#uid = uid;
@@ -28,14 +31,15 @@ class Profile {
     return new Promise((resolve, reject) => {
       let sql = ``;
       sql += `INSERT INTO \`profiles\` ( `;
-      sql += `uid, name, phone, passhash, gender, birthyear, offset_up, offset_down, height, major, mbti, looklike, smoking`;
+      sql += `uid, name, phone, instagram, passhash, gender, birthyear, offset_up, offset_down, height, major, mbti, looklike, smoking`;
       sql += ` ) VALUES ( `;
-      sql += `?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?`;
+      sql += `?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?`;
       sql += ` );`;
       let values = [];
       values.push(this.#uid);
       values.push(this.#name);
       values.push(this.#phone);
+      values.push(this.#instagram);
       values.push(this.#passhash);
       values.push(this.#gender);
       values.push(this.#birthyear);
@@ -70,6 +74,7 @@ class Profile {
 
           this.#name = data.name;
           this.#phone = data.phone;
+          this.#instagram = data.instagram;
           this.#passhash = data.passhash;
           this.#gender = data.gender;
           this.#birthyear = data.birthyear;
@@ -81,6 +86,7 @@ class Profile {
           this.#looklike = data.looklike;
           this.#smoking = data.smoking;
           this.#choicescount = data.choicescount;
+          this.#messagescount = data.messagescount;
 
           resolve();
         })
@@ -94,6 +100,7 @@ class Profile {
       sql += `UPDATE \`profiles\` `;
       sql += `SET \`name\` = ?, `;
       sql += `\`phone\` = ?, `;
+      sql += `\`instagram\` = ?, `;
       sql += `\`gender\` = ?, `;
       sql += `\`birthyear\` = ?, `;
       sql += `\`offset_up\` = ?, `;
@@ -104,11 +111,13 @@ class Profile {
       sql += `\`looklike\` = ?, `;
       sql += `\`smoking\` = ?, `;
       sql += `\`choicescount\` = ? `;
+      sql += `\`messagescount\` = ? `;
       sql += `WHERE \`uid\` = ? `;
       sql += `;`;
       let values = [];
       values.push(this.#name);
       values.push(this.#phone);
+      values.push(this.#instagram);
       values.push(this.#gender);
       values.push(this.#birthyear);
       values.push(this.#offset_up);
@@ -119,6 +128,7 @@ class Profile {
       values.push(this.#looklike);
       values.push(this.#smoking);
       values.push(this.#choicescount);
+      values.push(this.#messagescount);
       values.push(this.#uid);
 
       database.query(sql, values).then(resolve).catch(reject);
@@ -155,6 +165,7 @@ class Profile {
     if (!name) {
       throw 'default400';
     }
+    name = name.substring(0, 32);
     this.#name = name;
   }
 
@@ -167,7 +178,18 @@ class Profile {
     if (!phone) {
       throw 'default400';
     }
+    phone = phone.substring(0, 32);
     this.#phone = phone;
+  }
+
+  get instagram() {
+    return this.#instagram;
+  }
+
+  set instagram(instagram) {
+    instagram = database.escape(instagram);
+    instagram = instagram.substring(0, 32);
+    this.#instagram = instagram;
   }
 
   get gender() {
@@ -179,6 +201,8 @@ class Profile {
     if (!gender) {
       throw 'default400';
     }
+    gender = gender.substring(0, 1);
+    gender = gender.toUpperCase();
     this.#gender = gender;
   }
 
@@ -228,7 +252,9 @@ class Profile {
   }
 
   set major(major) {
-    this.#major = database.escape(major);
+    major = database.escape(major);
+    major = major.substring(0, 32);
+    this.#major = major;
   }
 
   get mbti() {
@@ -236,7 +262,9 @@ class Profile {
   }
 
   set mbti(mbti) {
-    this.#mbti = database.escape(mbti);
+    mbti = database.escape(mbti);
+    mbti = mbti.substring(0, 32);
+    this.#mbti = mbti;
   }
 
   get looklike() {
@@ -248,6 +276,7 @@ class Profile {
     if (!looklike) {
       throw 'default400';
     }
+    looklike = looklike.substring(0, 32);
     this.#looklike = looklike;
   }
 
@@ -267,11 +296,20 @@ class Profile {
     this.#choicescount = choicescount;
   }
 
+  get messagescount() {
+    return this.#messagescount;
+  }
+
+  set messagescount(messagescount) {
+    this.#messagescount = messagescount;
+  }
+
   toJSON() {
     return {
       uid: this.uid,
       name: this.name,
       phone: this.phone,
+      instagram: this.instagram,
       gender: this.gender,
       birthyear: this.birthyear,
       birthyear_offset: {
@@ -362,6 +400,10 @@ class Profile {
           values.push(target.uid);
 
           database.query(sql, values).then(resolve).catch(reject);
+
+          let text = ``;
+
+          message.send(target.phone, text);
         })
         .catch(reject);
     });
@@ -440,6 +482,34 @@ class Profile {
       }
 
       resolve(profilesData);
+    });
+  }
+
+  async message(target, text) {
+    return new Promise(async (resolve, reject) => {
+      if (this.#messagescount <= 0) {
+        reject('default409');
+        return;
+      }
+
+      const profiles = await this.choices();
+
+      const uids = [];
+      for (const profile of profiles) {
+        uids.push(profile.uid);
+      }
+
+      if (!uids.includes(target.uid)) {
+        reject('default404');
+        return;
+      }
+
+      this.#messagescount--;
+      this.update()
+        .then(() => {
+          message.send(target.phone, text);
+        })
+        .catch(reject);
     });
   }
 }
