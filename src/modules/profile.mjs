@@ -402,6 +402,13 @@ class Profile {
           database.query(sql, values).then(resolve).catch(reject);
 
           let text = ``;
+          test += `[Hi, CC!] ${this.#name}님이 당신을 선택하셨습니다.`;
+          test += `지금 바로 연락해보세요!`;
+          if (this.#instagram) {
+            test += `@${this.#instagram}`;
+          } else {
+            test += `${this.#phone}`;
+          }
 
           message.send(target.phone, text);
         })
