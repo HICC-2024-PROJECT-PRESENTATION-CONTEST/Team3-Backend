@@ -12,6 +12,9 @@ function send(to, text) {
   form.append('msg', text);
 
   return new Promise((resolve, reject) => {
+    resolve();
+    return;
+
     const req = https.request(
       {
         method: 'POST',

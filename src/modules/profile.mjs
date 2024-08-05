@@ -110,7 +110,7 @@ class Profile {
       sql += `\`mbti\` = ?, `;
       sql += `\`looklike\` = ?, `;
       sql += `\`smoking\` = ?, `;
-      sql += `\`choicescount\` = ? `;
+      sql += `\`choicescount\` = ?, `;
       sql += `\`messagescount\` = ? `;
       sql += `WHERE \`uid\` = ? `;
       sql += `;`;
@@ -402,12 +402,12 @@ class Profile {
           database.query(sql, values).then(resolve).catch(reject);
 
           let text = ``;
-          test += `[Hi, CC!] ${this.#name}님이 당신을 선택하셨습니다.`;
-          test += `지금 바로 연락해보세요!`;
+          text += `[Hi, CC!] ${this.#name}님이 당신을 선택하셨습니다.`;
+          text += `지금 바로 연락해보세요!`;
           if (this.#instagram) {
-            test += `@${this.#instagram}`;
+            text += `@${this.#instagram}`;
           } else {
-            test += `${this.#phone}`;
+            text += `${this.#phone}`;
           }
 
           message.send(target.phone, text);

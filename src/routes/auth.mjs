@@ -25,8 +25,9 @@ router.get('/qr/:key', async (req, res) => {
   if (req.session.login && req.session.profile) {
     const profile = new Profile(req.session.profile);
     await profile.read().catch(res.error);
-    profile.choicescount++;
-    profile.messagescount++;
+    profile.choicescount = profile.choicescount + 1;
+    profile.messagescount = profile.messagescount + 1;
+    await profile.update().catch(res.error);
   } else {
     req.session.login = true;
     req.session.profile = null;
@@ -56,7 +57,7 @@ router.post('/logout', async (req, res) => {
 });
 
 router.post('/manager/login', async (req, res) => {
-  const key = req.params.key;
+  const key = req.body.key;
 
   if (!(key === config['manager-key'])) {
     res.error('auth401');
