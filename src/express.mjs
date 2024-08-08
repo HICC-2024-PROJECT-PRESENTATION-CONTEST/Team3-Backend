@@ -21,14 +21,15 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+app.options('*', (req, res) => {
+  res.status(200).end();
+});
+
 import router from './routes/root.mjs';
 app.use('/', router);
 
 app.use(express.static(path.resolve(__dirname, './public')));
 
-app.options('*', (req, res) => {
-  res.status(200).end();
-});
 app.all('*', (req, res) => {
   res.error('default404');
 });
