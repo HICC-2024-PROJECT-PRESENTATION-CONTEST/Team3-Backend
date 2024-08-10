@@ -41,13 +41,16 @@ router.post('/login', async (req, res) => {
   const phone = req.body.phone;
   const password = req.body.password;
 
-  const profile = await auth.login(phone, password).catch(res.error);
+  auth
+    .login(phone, password)
+    .then(async (profile) => {
+      req.session.login = true;
+      req.session.profile = profile?.uid;
+      await req.session.save().catch(res.error);
 
-  req.session.login = true;
-  req.session.profile = profile.uid;
-  await req.session.save().catch(res.error);
-
-  req.query.redir ? res.redirect(req.query.redir) : res.ok();
+      req.query.redir ? res.redirect(req.query.redir) : res.ok();
+    })
+    .catch(res.error);
 });
 
 router.post('/logout', async (req, res) => {
