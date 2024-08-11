@@ -4,6 +4,8 @@ import crypto from 'node:crypto';
 import seedrandom from 'seedrandom';
 
 class Profile {
+  #read = false;
+
   #uid;
   #name;
   #phone;
@@ -71,6 +73,8 @@ class Profile {
           }
 
           const data = dataArray[0];
+
+          this.#read = true;
 
           this.#name = data.name;
           this.#phone = data.phone;
@@ -305,23 +309,30 @@ class Profile {
   }
 
   toJSON() {
-    return {
-      uid: this.uid,
-      name: this.name,
-      phone: this.phone,
-      instagram: this.instagram,
-      gender: this.gender,
-      birthyear: this.birthyear,
-      birthyear_offset: {
-        plus: this.offset_up,
-        minus: this.offset_down,
-      },
-      height: this.height,
-      major: this.major,
-      mbti: this.mbti,
-      looklike: this.looklike,
-      smoking: this.smoking,
-    };
+    if (!this.#read) {
+      return {
+        uid: this.uid,
+        delete: true,
+      };
+    } else {
+      return {
+        uid: this.uid,
+        name: this.name,
+        phone: this.phone,
+        instagram: this.instagram,
+        gender: this.gender,
+        birthyear: this.birthyear,
+        birthyear_offset: {
+          plus: this.offset_up,
+          minus: this.offset_down,
+        },
+        height: this.height,
+        major: this.major,
+        mbti: this.mbti,
+        looklike: this.looklike,
+        smoking: this.smoking,
+      };
+    }
   }
 
   async recommands(size) {
@@ -447,7 +458,13 @@ class Profile {
         profiles.push(profile);
         tasks.push(profile.read());
       }
-      await Promise.all(tasks).catch(reject);
+      await Promise.all(tasks).catch((error) => {
+        if (error === 'profile404') {
+          return null;
+        } else {
+          reject(error);
+        }
+      });
 
       const profilesData = [];
       for (const profile of profiles) {
@@ -478,7 +495,13 @@ class Profile {
         profiles.push(profile);
         tasks.push(profile.read());
       }
-      await Promise.all(tasks).catch(reject);
+      await Promise.all(tasks).catch((error) => {
+        if (error === 'profile404') {
+          return null;
+        } else {
+          reject(error);
+        }
+      });
 
       const profilesData = [];
       for (const profile of profiles) {
