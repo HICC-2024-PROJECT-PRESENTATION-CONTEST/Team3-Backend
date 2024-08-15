@@ -336,7 +336,16 @@ class Profile {
   }
 
   async recommands(size) {
-    const random = seedrandom(this.#uid);
+    const uids = [];
+    for (const profile of await this.choices()) {
+      uids.push(profile.uid);
+    }
+
+    const random = seedrandom(this.#uid + uids.length);
+
+    for (const profile of await this.choicesFrom()) {
+      uids.push(profile.uid);
+    }
 
     return new Promise(async (resolve, reject) => {
       const quries = [
@@ -406,9 +415,12 @@ class Profile {
           const index = Math.floor(random() * dataArray.length);
           const data = dataArray[index];
           dataArray.splice(index, 1);
-          const profile = new Profile(data.uid);
-          profiles.push(profile);
-          tasks.push(profile.read());
+
+          if (!uids.includes(data.uid)) {
+            const profile = new Profile(data.uid);
+            profiles.push(profile);
+            tasks.push(profile.read());
+          }
 
           if (profiles.length >= size) {
             break loop;

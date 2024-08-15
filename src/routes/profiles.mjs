@@ -90,7 +90,11 @@ router.all('/:uid*', check.isLoginOrManager(), async (req, res, next) => {
 router.get('/:uid', check.isMeOrManager(), async (req, res) => {
   const profile = req.profile;
 
-  res.data(profile.toJSON());
+  const data = profile.toJSON();
+  data.choicescount = profile.choicescount;
+  data.messagescount = profile.messagescount;
+
+  res.data(data);
 });
 
 router.patch('/:uid', check.isMeOrManager(), async (req, res) => {
@@ -98,8 +102,7 @@ router.patch('/:uid', check.isMeOrManager(), async (req, res) => {
 
   try {
     profile.name = req.body.name;
-    profile.gender = req.body.gender;
-    profile.birthyear = req.body.birthyear;
+    profile.instagram = req.body.instagram;
     profile.height = req.body.height;
     profile.major = req.body.major;
     profile.mbti = req.body.mbti;
