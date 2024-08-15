@@ -341,11 +341,51 @@ class Profile {
     return new Promise(async (resolve, reject) => {
       const quries = [
         {
-          sql: `SELECT uid FROM \`profiles\` WHERE \`gender\` != ? AND \`birthyear\` < ? AND \`birthyear\` > ?`,
+          sql: `SELECT uid FROM \`profiles\` WHERE \`gender\` != ? AND \`birthyear\` <= ? AND \`birthyear\` >= ?`,
           values: [
             this.#gender,
             this.#birthyear + this.offset_up,
             this.#birthyear - this.offset_down,
+          ],
+        },
+        {
+          sql: `SELECT uid FROM \`profiles\` WHERE \`gender\` != ? AND \`birthyear\` <= ? AND \`birthyear\` >= ?`,
+          values: [
+            this.#gender,
+            this.#birthyear + this.offset_up + 1,
+            this.#birthyear - this.offset_down + 1,
+          ],
+        },
+        {
+          sql: `SELECT uid FROM \`profiles\` WHERE \`gender\` != ? AND \`birthyear\` <= ? AND \`birthyear\` >= ?`,
+          values: [
+            this.#gender,
+            this.#birthyear + this.offset_up + 2,
+            this.#birthyear - this.offset_down + 2,
+          ],
+        },
+        {
+          sql: `SELECT uid FROM \`profiles\` WHERE \`gender\` != ? AND \`birthyear\` <= ? AND \`birthyear\` >= ?`,
+          values: [
+            this.#gender,
+            this.#birthyear + this.offset_up + 3,
+            this.#birthyear - this.offset_down + 3,
+          ],
+        },
+        {
+          sql: `SELECT uid FROM \`profiles\` WHERE \`gender\` != ? AND \`birthyear\` <= ? AND \`birthyear\` >= ?`,
+          values: [
+            this.#gender,
+            this.#birthyear + this.offset_up + 4,
+            this.#birthyear - this.offset_down + 4,
+          ],
+        },
+        {
+          sql: `SELECT uid FROM \`profiles\` WHERE \`gender\` != ? AND \`birthyear\` <= ? AND \`birthyear\` >= ?`,
+          values: [
+            this.#gender,
+            this.#birthyear + this.offset_up + 5,
+            this.#birthyear - this.offset_down + 5,
           ],
         },
         {
@@ -522,10 +562,11 @@ class Profile {
         return;
       }
 
-      const profiles = await this.choices();
-
       const uids = [];
-      for (const profile of profiles) {
+      for (const profile of await this.choices()) {
+        uids.push(profile.uid);
+      }
+      for (const profile of await this.choicesFrom()) {
         uids.push(profile.uid);
       }
 
@@ -537,7 +578,7 @@ class Profile {
       this.#messagescount--;
       this.update()
         .then(() => {
-          message.send(target.phone, text);
+          message.send(target.phone, text).then(resolve).catch(reject);
         })
         .catch(reject);
     });

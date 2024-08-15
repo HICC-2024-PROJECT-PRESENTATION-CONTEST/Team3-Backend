@@ -197,13 +197,20 @@ router.delete('/:uid/choices', check.isManager(), async (req, res) => {
 
 router.post('/:uid/message', check.isMeOrManager(), async (req, res) => {
   const target = new Profile(req.body.target);
-  await target.read().catch(res.error);
 
-  const message = req.body.message;
+  target
+    .read()
+    .then(() => {
+      const message = req.body.message;
 
-  await req.profile.message(target, message).catch(res.error);
-
-  res.ok();
+      req.profile
+        .message(target, message)
+        .then(() => {
+          res.ok();
+        })
+        .catch(res.error);
+    })
+    .catch(res.error);
 });
 
 export default router;
