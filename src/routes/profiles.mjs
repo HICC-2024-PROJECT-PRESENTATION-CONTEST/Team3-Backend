@@ -172,11 +172,17 @@ router.get('/:uid/choices', check.isMeOrManager(), async (req, res) => {
 router.post('/:uid/choices', check.isMeOrManager(), async (req, res) => {
   const target = new Profile(req.body.target);
 
-  await target.read().catch(res.error);
-
-  await req.profile.choice(target).catch(res.error);
-
-  res.ok();
+  target
+    .read()
+    .then(() => {
+      req.profile
+        .choice(target)
+        .then(() => {
+          res.ok();
+        })
+        .catch(res.error);
+    })
+    .catch(res.error);
 });
 
 router.delete('/:uid/choices', check.isManager(), async (req, res) => {
